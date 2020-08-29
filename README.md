@@ -7,6 +7,8 @@
 - Implement searching for sticky notes other than exact text
 - Finish implementing match exact text
 - Add editing of sticky notes
+- Add usage of markdown within the sticky notes
+- Add custom creation date
 
 ## A simple example to create new sticky notes
 ```
