@@ -6,6 +6,7 @@
 ## TODO:
 - Implement searching for sticky notes other than exact text
 - Finish implementing match exact text
+- Add editing of sticky notes
 
 ## A simple example to create new sticky notes
 ```
