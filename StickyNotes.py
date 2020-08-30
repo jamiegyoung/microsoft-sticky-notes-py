@@ -12,6 +12,7 @@ class StickyNotes:
   def __init__(self, dir=defaultDir):
     if os.name != 'nt':
       raise OSError("Operating system is not supported")
+
     os.system('explorer.exe shell:appsFolder\Microsoft.MicrosoftStickyNotes_8wekyb3d8bbwe!App')
 
     if not os.path.isdir(defaultDir):
@@ -32,7 +33,7 @@ class StickyNotes:
         "Blue",
         "Gray",
         "Charcoal",
-      ]
+      ] 
       self.yellow = 'Yellow'
       self.white = 'White'
       self.green = 'Green'
@@ -55,9 +56,12 @@ class StickyNotes:
   def closeDB(self):
     self.__db.close()
 
-  # def getNote(self):
-  #   self.__cursor.execute('SELECT * FROM Note')
-  #   return self.__cursor.fetchone()[0]
+  def getNotes(self, id):
+    self.__cursor.execute('SELECT * FROM Note WHERE Id = ?', [id])
+    return list(map(lambda x: Note(x[0], x[5], bool(x[2])), self.__cursor.fetchall()))
+    # for selectedNote in self.__cursor.fetchall():
+    #   return Note(selectedNote[0], selectedNote[5], bool(selectedNote[2]))
+      
 
   def writeNote(self, note):
     if type(note) == Note:
@@ -65,7 +69,7 @@ class StickyNotes:
         type(note.text) == str):
           self.__cursor.execute(
             'INSERT INTO Note(Text, Theme, IsOpen, Id) values (?, ?, ?, ?)',
-            [note.text, note.theme, note.getIsOpen(), str(uuid4())])
+            [note.text, note.theme, note.getIsOpen(), note.id])
       else:
         raise TypeError('Incorrect type within Note')
     else:
@@ -95,6 +99,7 @@ class Note():
     self.text = text
     self.setIsOpen(isOpen)
     self.setTheme(theme)
+    self.id = str(uuid4())
 
   def setTheme(self, theme):
     if theme == None:
@@ -102,11 +107,15 @@ class Note():
     else:
       self.theme = theme
 
+  # Probably a better way of doing this
   def setIsOpen(self, isOpen):
-    if (isOpen == False): self.__isOpen = 0
-    if (isOpen == True): self.__isOpen = 1
+    isOpenBool = bool(isOpen)
+    if (isOpenBool == False):
+      self.__isOpen = 0
+    if (isOpenBool == True):
+      self.__isOpen = 1
 
-  def getIsOpen(self): return self.__isOpen
+  def getIsOpen(self): return bool(self.__isOpen)
 
   # def findMonitors(self):
   #   self.__monitors = []

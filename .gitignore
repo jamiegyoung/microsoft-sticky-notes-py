@@ -127,3 +127,9 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Other
+test.py
+plum.sqlite
+plum.sqlite-wal
+plum.sqlite-shm
