@@ -133,3 +133,4 @@ test.py
 plum.sqlite
 plum.sqlite-wal
 plum.sqlite-shm
+docs/
