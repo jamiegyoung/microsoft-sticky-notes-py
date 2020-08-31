@@ -68,7 +68,7 @@ class StickyNotes:
         if self.__managedPosition is None and note.getIsOpen() == True:
           self.__cursor.execute(
             'INSERT INTO Note(Text, Theme, IsOpen, Id) values (?, ?, ?, ?)',
-            ["tmp", note.theme, 1, "tmp"])
+            ["", note.theme, 1, "tmp"])
           self.commit()
           self.reloadNotes()
 
