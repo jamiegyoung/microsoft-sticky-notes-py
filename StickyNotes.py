@@ -5,12 +5,11 @@ import psutil
 import platform
 import wmi
 import time
+from datetime import datetime, timedelta
 from random import randint
 from uuid import uuid4
 import warnings
 defaultDir = os.path.join(os.getenv('UserProfile'), 'AppData\\Local\\Packages\\Microsoft.MicrosoftStickyNotes_8wekyb3d8bbwe\\LocalState\\')
-
-# A new note could be created without a reference by inserting a note, getting position
 
 class StickyNotes:
   def __init__(self, dir=defaultDir):
@@ -60,11 +59,11 @@ class StickyNotes:
   def deleteNote(self, id):
     self.__cursor.execute('DELETE FROM Note WHERE Id = ?', [id])
 
+
   def writeNote(self, note):
     if type(note) == Note:
       if (note.theme in self.theme.themes and
         type(note.text) == str):
-        
         if self.__managedPosition is None and note.getIsOpen() == True:
           self.__cursor.execute(
             'INSERT INTO Note(Text, Theme, IsOpen, Id) values (?, ?, ?, ?)',
@@ -79,10 +78,9 @@ class StickyNotes:
             pass
 
         self.deleteNote("tmp")
-
         self.__cursor.execute(
-          'INSERT INTO Note(Text , WindowPosition,Theme, IsOpen, Id) values (?, ?, ?, ?, ?)',
-          [note.text, self.getWindowPositionString(note), note.theme, note.getIsOpen(), note.id])
+          'INSERT INTO Note(Text , WindowPosition,Theme, IsOpen, Id, CreatedAt, UpdatedAt) values (?, ?, ?, ?, ?, ?, ?)',
+          [note.text, self.getWindowPositionString(note), note.theme, note.getIsOpen(), note.id, note.getTicks(), note.getTicks()])
       else:
         raise TypeError('Incorrect type within Note')
     else:
@@ -92,7 +90,8 @@ class StickyNotes:
     for note in notes:
       self.writeNote(note)
 
-  def reloadNotes(self):
+  @staticmethod
+  def reloadNotes():
     for p in psutil.process_iter():
       if "Microsoft.Notes.exe" in p.name():
         p.kill()
@@ -129,13 +128,25 @@ class Note():
     self.setIsOpen(isOpen)
     self.setTheme(theme)
     self.id = str(uuid4())
-
     self.size = self.calculateSize()
-    
+    self._creationTicks = self._calcCreationTicks(datetime.utcnow())
     self.position = {
       "x": randint(0, 500),
       "y": randint(0, 500),
     }
+
+  @staticmethod
+  def _calcCreationTicks(dt):
+    return (dt - datetime(1, 1, 1)).total_seconds() * 10000000
+
+  def getCreationDate(self):
+    return datetime.datetime(1, 1, 1) + datetime.timedelta(microseconds = self._creationTicks/10)
+
+  def setCreationDate(self, dt):
+    self._creationTicks = self._calcCreationTicks(dt)
+
+  def getTicks(self):
+    return self._creationTicks
 
   def calculateSize(self):
     textArray = self.text.replace("\r", "").split('\n')
@@ -168,23 +179,3 @@ class Note():
       self.__isOpen = 1
 
   def getIsOpen(self): return self.__isOpen
-
-  # def findMonitors(self):
-  #   self.__monitors = []
-  #   obj = wmi.WMI().Win32_PnPEntity(ConfigManagerErrorCode=0)
-  #   displays = [x for x in obj if 'DISPLAY' in str(x)]
-  #   for monitor in displays:
-  #     if 'UID' in monitor.DeviceID:
-  #       print(monitor)
-  #       self.__monitors.append(monitor.DeviceID)
-
-  # def writeNote(self): 
-    # self.__cursor.execute('''INSERT INTO Note())
-
-  # def setPos(self):
-
-  
-# db = sqlite3.connect(stickyNoteDBPath)
-# cursor = db.cursor()
-# cursor.execute('SELECT * FROM Note')
-# print(cursor.fetchone())
