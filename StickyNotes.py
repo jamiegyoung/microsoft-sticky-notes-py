@@ -128,12 +128,17 @@ class Note():
     self.set_is_open(isOpen)
     self.set_theme(theme)
     self.id = str(uuid4())
-    self.size = self.calculate_size()
+    self.size = {
+      "width": 320,
+      "height": 320
+    }
     self._creation_ticks = self._calc_creation_ticks(datetime.utcnow())
     self.position = {
       "x": randint(0, 500),
       "y": randint(0, 500),
     }
+    
+    self.auto_height = True
 
   @staticmethod
   def _calc_creation_ticks(dt):
@@ -162,6 +167,7 @@ class Note():
     return "Position={},{}".format(self.position["x"], self.position["y"])
   
   def get_size_string(self):
+    if self.auto_height: self.size = self.calculate_size()
     return "Size={},{}".format(self.size["width"], self.size["height"])
 
   def set_theme(self, theme):
