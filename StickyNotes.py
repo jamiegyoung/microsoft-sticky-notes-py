@@ -67,7 +67,6 @@ class StickyNotes:
             'INSERT INTO Note(Text, Theme, IsOpen, Id) values (?, ?, ?, ?)',
             [note.text, note.theme, 0, note.id])
         else:
-          print(self.getWindowPositionString(note))
           self.__cursor.execute(
             'INSERT INTO Note(Text , WindowPosition,Theme, IsOpen, Id) values (?, ?, ?, ?, ?)',
             [note.text, self.getWindowPositionString(note), note.theme, note.getIsOpen(), note.id])
