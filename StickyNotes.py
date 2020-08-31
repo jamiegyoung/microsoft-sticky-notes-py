@@ -5,10 +5,10 @@ import psutil
 import platform
 import wmi
 import time
+import warnings
 from datetime import datetime, timedelta
 from random import randint
 from uuid import uuid4
-import warnings
 
 DEFAULT_DIR = os.path.join(os.getenv('UserProfile'), 'AppData\\Local\\Packages\\Microsoft.MicrosoftStickyNotes_8wekyb3d8bbwe\\LocalState\\')
 
@@ -62,12 +62,12 @@ class StickyNotes:
 
   def write_note(self, note):
     if type(note) == Note:
-      if (note.theme in self.theme.themes and
-        type(note.text) == str):
+      temp_uuid = str(uuid4())
+      if (note.theme in self.theme.themes and type(note.text) == str):
         if self._managed_position is None and note.get_is_open() == True:
           self._cursor.execute(
             'INSERT INTO Note(Text, Theme, IsOpen, Id) values (?, ?, ?, ?)',
-            ["", note.theme, 1, "tmp"])
+            ["", note.theme, 1, temp_uuid])
           self.commit()
           self.reload_notes()
 
@@ -77,7 +77,7 @@ class StickyNotes:
             self._managed_position = self.get_managed_position()
             pass
 
-        self.delete_note("tmp")
+        self.delete_note(temp_uuid)
         self._cursor.execute(
           'INSERT INTO Note(Text , WindowPosition,Theme, IsOpen, Id, CreatedAt, UpdatedAt) values (?, ?, ?, ?, ?, ?, ?)',
           [note.text, self.get_window_position_string(note), note.theme, note.get_is_open(), note.id, note.get_ticks(), note.get_ticks()])
