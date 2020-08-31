@@ -9,89 +9,89 @@ from datetime import datetime, timedelta
 from random import randint
 from uuid import uuid4
 import warnings
-defaultDir = os.path.join(os.getenv('UserProfile'), 'AppData\\Local\\Packages\\Microsoft.MicrosoftStickyNotes_8wekyb3d8bbwe\\LocalState\\')
+
+DEFAULT_DIR = os.path.join(os.getenv('UserProfile'), 'AppData\\Local\\Packages\\Microsoft.MicrosoftStickyNotes_8wekyb3d8bbwe\\LocalState\\')
 
 class StickyNotes:
-  def __init__(self, dir=defaultDir):
+  def __init__(self, dir=DEFAULT_DIR):
     if os.name != 'nt':
       raise OSError("Operating system is not supported")
 
     os.system('explorer.exe shell:appsFolder\Microsoft.MicrosoftStickyNotes_8wekyb3d8bbwe!App')
 
-    if not os.path.isdir(defaultDir):
+    if not os.path.isdir(DEFAULT_DIR):
       raise IOError("Microsoft Sticky Notes not found")
 
     self.directory = dir
-    self.connectToDB()
+    self.connect_to_db()
 
-    self.__managedPosition = self.getManagedPosition()
+    self._managed_position = self.get_managed_position()
     self.theme = self.__Theme()
 
   # This is not how I wanted to do this but due to a recent update it is required
-  def getManagedPosition(self):
-    self.__cursor.execute('SELECT WindowPosition FROM Note')
-    for windowPosition in self.__cursor.fetchall():
-      if not windowPosition[0] is None:
-        notePosition = windowPosition[0].split(";")
-        if notePosition[0][0:25] == "ManagedPosition=DeviceId:":
-          return notePosition[0]
-        
-  def getWindowPositionString(self, note):
-    return ";".join([self.__managedPosition, note.getPositionString(), note.getSizeString()])
+  def get_managed_position(self):
+    self._cursor.execute('SELECT WindowPosition FROM Note')
+    for window_position in self._cursor.fetchall():
+      if not window_position[0] is None:
+        note_position = window_position[0].split(";")
+        if note_position[0][0:25] == "ManagedPosition=DeviceId:":
+          return note_position[0]
 
-  def getDir(self):
+  def get_window_position_string(self, note):
+    return ";".join([self._managed_position, note.get_position_string(), note.get_size_string()])
+
+  def get_dir(self):
     return self.directory
 
-  def connectToDB(self):
+  def connect_to_db(self):
     if os.path.isfile(os.path.join(self.directory, 'plum.sqlite')):
       self.__db = sqlite3.connect(os.path.join(self.directory, 'plum.sqlite'))
-      self.__cursor = self.__db.cursor()
+      self._cursor = self.__db.cursor()
     else:
       raise FileNotFoundError('Database file not found')
 
-  def closeDB(self):
+  def close_db(self):
     self.__db.close()
 
-  def getNotes(self, id):
-    self.__cursor.execute('SELECT * FROM Note WHERE Id = ?', [id])
-    return list(map(lambda x: Note(x[0], x[5], x[2]), self.__cursor.fetchall()))
+  def get_notes(self, id):
+    self._cursor.execute('SELECT * FROM Note WHERE Id = ?', [id])
+    return list(map(lambda x: Note(x[0], x[5], x[2]), self._cursor.fetchall()))
    
-  def deleteNote(self, id):
-    self.__cursor.execute('DELETE FROM Note WHERE Id = ?', [id])
+  def delete_note(self, id):
+    self._cursor.execute('DELETE FROM Note WHERE Id = ?', [id])
 
-
-  def writeNote(self, note):
+  def write_note(self, note):
     if type(note) == Note:
       if (note.theme in self.theme.themes and
         type(note.text) == str):
-        if self.__managedPosition is None and note.getIsOpen() == True:
-          self.__cursor.execute(
+        if self._managed_position is None and note.get_is_open() == True:
+          self._cursor.execute(
             'INSERT INTO Note(Text, Theme, IsOpen, Id) values (?, ?, ?, ?)',
             ["", note.theme, 1, "tmp"])
           self.commit()
-          self.reloadNotes()
+          self.reload_notes()
 
           # Welp this is ghetto but it works
-          while not self.__managedPosition:
+          while not self._managed_position:
             time.sleep(.1)
-            self.__managedPosition = self.getManagedPosition()
+            self._managed_position = self.get_managed_position()
             pass
 
-        self.deleteNote("tmp")
-        self.__cursor.execute(
+        self.delete_note("tmp")
+        self._cursor.execute(
           'INSERT INTO Note(Text , WindowPosition,Theme, IsOpen, Id, CreatedAt, UpdatedAt) values (?, ?, ?, ?, ?, ?, ?)',
-          [note.text, self.getWindowPositionString(note), note.theme, note.getIsOpen(), note.id, note.getTicks(), note.getTicks()])
+          [note.text, self.get_window_position_string(note), note.theme, note.get_is_open(), note.id, note.get_ticks(), note.get_ticks()])
       else:
         raise TypeError('Incorrect type within Note')
     else:
       raise TypeError('Note expected')
 
-  def writeNotes(self, *notes):
+  def write_notes(self, *notes):
     for note in notes:
-      self.writeNote(note)
+      self.write_note(note)
 
   @staticmethod
-  def reloadNotes():
+  def reload_notes():
     for p in psutil.process_iter():
       if "Microsoft.Notes.exe" in p.name():
         p.kill()
@@ -125,57 +125,57 @@ class StickyNotes:
 class Note():
   def __init__(self, text, theme=None, isOpen=False):
     self.text = text
-    self.setIsOpen(isOpen)
-    self.setTheme(theme)
+    self.set_is_open(isOpen)
+    self.set_theme(theme)
     self.id = str(uuid4())
-    self.size = self.calculateSize()
-    self._creationTicks = self._calcCreationTicks(datetime.utcnow())
+    self.size = self.calculate_size()
+    self._creation_ticks = self._calc_creation_ticks(datetime.utcnow())
     self.position = {
       "x": randint(0, 500),
       "y": randint(0, 500),
     }
 
   @staticmethod
-  def _calcCreationTicks(dt):
+  def _calc_creation_ticks(dt):
     return (dt - datetime(1, 1, 1)).total_seconds() * 10000000
 
-  def getCreationDate(self):
-    return datetime.datetime(1, 1, 1) + datetime.timedelta(microseconds = self._creationTicks/10)
+  def get_creation_date(self):
+    return datetime.datetime(1, 1, 1) + datetime.timedelta(microseconds = self._creation_ticks/10)
 
-  def setCreationDate(self, dt):
-    self._creationTicks = self._calcCreationTicks(dt)
+  def set_creation_date(self, dt):
+    self._creation_ticks = self._calc_creation_ticks(dt)
 
-  def getTicks(self):
-    return self._creationTicks
+  def get_ticks(self):
+    return self._creation_ticks
 
-  def calculateSize(self):
-    textArray = self.text.replace("\r", "").split('\n')
+  def calculate_size(self):
+    text_array = self.text.replace("\r", "").split('\n')
     # Fixed window height + line height, is rough but works in most scenarios
-    y = 90 + len(textArray) * 18.65
+    y = 90 + len(text_array) * 18.65
     if y < 320: y = 320
     return {
       "width": 320,
       "height": y
     }
 
-  def getPositionString(self):
+  def get_position_string(self):
     return "Position={},{}".format(self.position["x"], self.position["y"])
   
-  def getSizeString(self):
+  def get_size_string(self):
     return "Size={},{}".format(self.size["width"], self.size["height"])
 
-  def setTheme(self, theme):
+  def set_theme(self, theme):
     if theme == None:
       self.theme = 'White'
     else:
       self.theme = theme
 
   # Probably a better way of doing this
-  def setIsOpen(self, isOpen):
-    isOpenBool = bool(isOpen)
-    if (isOpenBool == False):
-      self.__isOpen = 0
-    if (isOpenBool == True):
-      self.__isOpen = 1
+  def set_is_open(self, isOpen):
+    is_open_bool = bool(isOpen)
+    if (is_open_bool == False):
+      self._is_open = 0
+    if (is_open_bool == True):
+      self._is_open = 1
 
-  def getIsOpen(self): return self.__isOpen
+  def get_is_open(self): return self._is_open
