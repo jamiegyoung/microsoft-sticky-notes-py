@@ -14,13 +14,13 @@
 ```py
 from StickyNotes import StickyNotes, Note
 
-stickyNotes = StickyNotes()
-newNote = Note('Hello', stickyNotes.Theme.blue, True)
-pinkNote = Note('World', stickyNotes.Theme.pink, True)
-stickyNotes.writeNotes(newNote, pinkNote)
-stickyNotes.commit()
-stickyNotes.reloadNotes()
-stickyNotes.closeDB()
+sticky_notes = StickyNotes()
+newNote = Note('Hello', sticky_notes.theme.blue, True)
+pinkNote = Note('World', sticky_notes.theme.pink, True)
+sticky_notes.write_notes(newNote, pinkNote)
+sticky_notes.commit()
+sticky_notes.reload_notes()
+sticky_notes.close_db()
 ```
 
 ## The same example using a custom db directory
@@ -33,16 +33,15 @@ stickyNoteDBPath = '/custompath/'
 
 if os.path.isdir(stickyNoteDBPath):
   stickyNotes = StickyNotes(stickyNoteDBPath)
-  newNote = Note('Hello', stickyNotes.Theme.blue, True)
-  pinkNote = Note('World', stickyNotes.Theme.pink, True)
-  stickyNotes.writeNotes(newNote, pinkNote)
+  newNote = Note('Hello', stickyNotes.theme.blue, True)
+  pinkNote = Note('World', stickyNotes.theme.pink, True)
+  stickyNotes.write_notes(newNote, pinkNote)
   stickyNotes.commit()
-  stickyNotes.reloadNotes()
-  stickyNotes.closeDB()
+  stickyNotes.reload_notes()
+  stickyNotes.close_db()
 else:
   print('Windows 10 Sticky Notes app not found')
   sys.exit()
-
 ```
 ---
 Note: The default Microsoft Sticky Notes db directory is:
