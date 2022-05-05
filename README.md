@@ -11,7 +11,7 @@
 - Add custom creation date
 
 ## A simple example to create new sticky notes
-```
+```py
 from StickyNotes import StickyNotes, Note
 
 stickyNotes = StickyNotes()
@@ -24,7 +24,7 @@ stickyNotes.closeDB()
 ```
 
 ## The same example using a custom db directory
-```
+```py
 import os
 import sys
 from StickyNotes import StickyNotes, Note
