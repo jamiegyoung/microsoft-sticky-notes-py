@@ -1,0 +1,1 @@
+from .StickyNotes import StickyNotes, Note

@@ -37,7 +37,6 @@ class StickyNotes:
         self.connect_to_db()
 
         self._managed_position = self.get_managed_position()
-        self.theme = self.__Theme()
 
     # This is not how I wanted to do this but due to a recent update it is required
     def get_managed_position(self):
@@ -103,7 +102,7 @@ class StickyNotes:
         temp_uuid = str(uuid4())
         self._cursor.execute(
             'INSERT INTO Note(Text, Theme, IsOpen, Id) values (?, ?, ?, ?)',
-            ["", self.theme.charcoal, 1, temp_uuid])
+            ["", Note.Theme.charcoal, 1, temp_uuid])
         self.commit()
         self.reload_notes()
 
@@ -125,7 +124,7 @@ class StickyNotes:
             if not type(note) == Note:
                 raise TypeError('Note expected')
 
-            if not note.theme in self.theme.themes or type(note.text) != str:
+            if not note.theme in Note.Theme.themes or type(note.text) != str:
                 raise TypeError('Incorrect type within Note')
 
             if self._managed_position is None and note.get_is_open():
@@ -288,7 +287,17 @@ class Note():
         """
         return self._is_open
 
-    class Theme(Enum):
+    class Theme():
+        themes = [
+            'Yellow',
+            'White',
+            'Green',
+            'Pink',
+            'Purple',
+            'Blue',
+            'Gray',
+            'Charcoal'
+        ]
         yellow = 'Yellow'
         white = 'White'
         green = 'Green'
