@@ -29,7 +29,7 @@ import os
 import sys
 from StickyNotes import StickyNotes, Note
 
-stickyNoteDBPath = '/custompath/
+stickyNoteDBPath = '/custompath/'
 
 if os.path.isdir(stickyNoteDBPath):
   stickyNotes = StickyNotes(stickyNoteDBPath)
