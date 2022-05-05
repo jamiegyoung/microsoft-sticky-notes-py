@@ -15,8 +15,8 @@
 from StickyNotes import StickyNotes, Note
 
 sticky_notes = StickyNotes()
-newNote = Note('Hello', sticky_notes.theme.blue, True)
-pinkNote = Note('World', sticky_notes.theme.pink, True)
+newNote = Note('Hello', Note.Theme.yellow, True)
+pinkNote = Note('World', Note.Theme.pink, True)
 sticky_notes.write_notes(newNote, pinkNote)
 sticky_notes.commit()
 sticky_notes.reload_notes()
@@ -33,8 +33,8 @@ stickyNoteDBPath = '/custompath/'
 
 if os.path.isdir(stickyNoteDBPath):
   stickyNotes = StickyNotes(stickyNoteDBPath)
-  newNote = Note('Hello', stickyNotes.theme.blue, True)
-  pinkNote = Note('World', stickyNotes.theme.pink, True)
+  newNote = Note('Hello', Note.Theme.yellow, True)
+  pinkNote = Note('World', Note.Theme.pink, True)
   stickyNotes.write_notes(newNote, pinkNote)
   stickyNotes.commit()
   stickyNotes.reload_notes()
